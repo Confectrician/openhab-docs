@@ -1,4 +1,4 @@
-name: Post Pull Request Cleanup
+name: Cleanup Pull Request after close
 
 # only trigger on pull request closed events
 on:
@@ -6,18 +6,14 @@ on:
     types: [ closed ]
 
 jobs:
-  merge_job:
-    # this job will only run if the PR has been merged
-    if: github.event.pull_request.merged == true
+  declutter:
     runs-on: ubuntu-latest
     steps:
-    - run: |
-        echo PR #${{ github.event.number }} has been merged
+    - name: Check out code
+      uses: actions/checkout@v2
 
-  close_job:
-      # this job will only run if the PR has been closed without being merged
-      if: github.event.pull_request.merged == false
-      runs-on: ubuntu-latest
-      steps:
-      - run: |
-          echo PR #${{ github.event.number }} has been closed without being merged.\nNothign to do here!
+    - name: Run declutter action
+      uses: Confectrician/post-pr-declutter@v0.1
+      with:
+        repo-token: "${{ github.token }}"
+        close-reason: github.event.pull_request.merged
